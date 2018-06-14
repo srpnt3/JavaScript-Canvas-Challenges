@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Some cool coding challenges with the JavaScript canvas.">
+    <link rel="stylesheet" href="/css/main.css">
+    <title>JavaScript Canvas Challenges</title>
+  </head>
+  <body>
+    <header>
+      <h1>Javascript Canvas Challenges</h1>
+      <p>Some cool coding challenges with the JavaScript canvas.</p>
+    </header>
+    <main class="challenges">
+    <% for (var i = 0; i < challenges.length; i++) { %>
+      <a class="challenge" href="/c/<%= challenges[i].safeName %>">
+        <h2 class="challenge-title"><%= challenges[i].name %></h1>
+        <p class="challenge-description"><%= challenges[i].description %></p>
+      </a>
+    <% } %>
+    </main>
+    <footer>
+      <p>Copyright &copy 2018 by VirusHD.<br>All rights reserved.</p>
+    </footer>
+  </body>
+</html>
