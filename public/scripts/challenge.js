@@ -32,6 +32,9 @@ function setup(callback) {
         x: vars.width/2,
         y: vars.height/2
       };
+    },
+    getRandomBoolean: function() {
+      return Math.floor(Math.random() * 2) == 1;
     }
   };
 

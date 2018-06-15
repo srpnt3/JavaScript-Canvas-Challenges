@@ -66,8 +66,109 @@ createChallenge("Circular Motion", "Particles that move in a circle around a poi
   };
 });
 
-createChallenge("Test 1", "Just for Testing.", function() {});
-createChallenge("Test 2", "Just for Testing.", function() {});
+createChallenge("Matrix Rain", "A wierd green rain...", function(vars, utilities) {
+
+  var i, columns, rows, font = 20,
+    drops = [];
+
+  function randomChar() {
+    var chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    return utilities.getRandomFromArray(chars.split(""));
+  }
+
+  function darkerWindow(a) {
+    vars.ctx.fillStyle = "rgba(0, 0, 0, " + a + ")";
+    vars.ctx.fillRect(0, 0, vars.width, vars.height);
+  }
+
+  var start = function() {
+
+    // set size
+    columns = Math.floor(vars.width / font) + 1;
+    rows = Math.floor(vars.height / font) + 1;
+    vars.ctx.font = font + "px arial";
+    i = 0;
+    intro();
+  };
+
+  function intro() {
+    if (i < rows) {
+
+      // normal intro
+      darkerWindow(0.05);
+      vars.ctx.fillStyle = "#0F0";
+      for (var j = 0; j < columns; j++) {
+        vars.ctx.fillText(randomChar(), j * font, i * font);
+      }
+    }
+    if (i < rows + 10) {
+
+      // fade out
+      darkerWindow(0.1);
+    } else {
+
+      // start update
+      i = true;
+      return;
+    }
+
+    i++;
+    setTimeout(intro, 33);
+  }
+
+  var update = function() {
+
+    // update size
+    columns = Math.floor(vars.width / font) + 1;
+    rows = Math.floor(vars.height / font) + 1;
+
+    if (i === true) {
+
+      // add drops (randomly)
+      if (utilities.getRandomBoolean()) {
+        drops.push({
+          column: utilities.getRandomNumber(0, columns - 1),
+          row: 0
+        });
+      }
+
+      darkerWindow(0.1);
+
+      // update drops
+      var newDrops = [];
+      vars.ctx.fillStyle = "#0F0";
+      vars.ctx.font = font + "px arial";
+      for (var j = 0; j < drops.length; j++) {
+        vars.ctx.fillText(randomChar(), drops[j].column * font, drops[j].row * font);
+        drops[j].row++;
+        if (drops[j].row < rows) {
+          newDrops.push(drops[j]);
+        }
+      }
+    }
+  };
+
+  return {
+    start: start,
+    update: update
+  };
+});
+
+// createChallenge("Snake", "A cool little game where you are a snake and have to eat white \"pixels\". But don't hit yourself or the edge", function(vars, utilities) {
+//
+//   var start = function() {
+//
+//   };
+//
+//   var update = function() {
+//
+//   };
+//
+//   return {
+//     start: start,
+//     update: update
+//   };
+// });
 
 // export module
 module.exports = challenges;
