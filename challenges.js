@@ -66,6 +66,9 @@ createChallenge("Circular Motion", "Particles that move in a circle around a poi
   };
 });
 
+// --------------------------
+// Matrix
+// --------------------------
 createChallenge("Matrix Rain", "A wierd green rain...", function(vars, utilities) {
 
   var i, columns, rows, font = 20,
@@ -86,7 +89,7 @@ createChallenge("Matrix Rain", "A wierd green rain...", function(vars, utilities
     // set size
     columns = Math.floor(vars.width / font) + 1;
     rows = Math.floor(vars.height / font) + 1;
-    vars.ctx.font = font + "px arial";
+    vars.ctx.font = font + "px matrix";
     i = 0;
     intro();
   };
@@ -137,7 +140,7 @@ createChallenge("Matrix Rain", "A wierd green rain...", function(vars, utilities
       // update drops
       var newDrops = [];
       vars.ctx.fillStyle = "#0F0";
-      vars.ctx.font = font + "px arial";
+      vars.ctx.font = font + "px matrix";
       for (var j = 0; j < drops.length; j++) {
         vars.ctx.fillText(randomChar(), drops[j].column * font, drops[j].row * font);
         drops[j].row++;
