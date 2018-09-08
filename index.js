@@ -1,7 +1,7 @@
 const express = require("express");
 const challenges = require("./challenges");
 const app = express();
-const port = 83;
+const port = 82;
 
 // view engine
 app.set('view engine', 'ejs');

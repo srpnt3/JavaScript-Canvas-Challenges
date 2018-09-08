@@ -1,7 +1,8 @@
 /* --------------------------
    Main CSS file
 -------------------------- */
-@import url(https://fonts.googleapis.com/css?family=Nunito);
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url('https://fonts.googleapis.com/css?family=Titan+One');
 
 @font-face {
 	font-family: matrix;
@@ -182,7 +183,9 @@
 	}
 
 	canvas {
-		vertical-align: bottom
+		vertical-align: bottom;
+		background-position: center;
+		background-size: cover;
 	}
 }
 
@@ -202,9 +205,4 @@
 	.challenge {
 		width: calc(100% - 2.01em)
 	}
-}
-
-@font-face {
-	font-family: matrix;
-	src: url(/fonts/matrix.otf)
 }
