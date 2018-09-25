@@ -516,7 +516,7 @@ createChallenge("Color Switch", "Don't hit the wrong colors.", function (vars, u
 		vars.ctx.arc(utilities.getCenterPoint().x, toReal(ball.height), ball.size, 0, 2 * Math.PI);
 		vars.ctx.fill();
 
-		objects.forEach(function (v, i) {
+		objects.forEach(function (v) {
 			v.render();
 		});
 	}
@@ -539,27 +539,23 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 	// some vars
 	const G = 6.74 * Math.pow(10, -11);
 	const scale = 1000000; // every pixel is 1000 km
-	let speed = 1;
+	const fps = 60;
+	const tail = 100;
 	let planets = [];
 
-	function clearRect() {
-		let pixels = vars.ctx.getImageData(0, 0, vars.width, vars.height);
-		for (let i = 3; i < pixels.data.length; i += 4) {
-			pixels.data[i] = Math.floor(pixels.data[i] * 0.9);
-		}
-		vars.ctx.putImageData(pixels, 0, 0);
-	}
-
 	// planet constructor
-	function Planet(name, color, mass, density, position, velocity) {
+	function Planet(name, color, mass, density, position, velocity, image) {
 
 		// some variables
 		this.name = name;
-		this.color = color;
+		this.color = color; // should be in hex
 		this.mass = mass; // kg
-		this.diameter = utilities.getSphereDiameter(mass, density); // m (density: g/cm3)
+		this.diameter = utilities.getSphereDiameter(mass, density) / scale; // pixels (density: g/cm3)
 		this.position = position; // pixels (depends on scale)
 		this.velocity = velocity; // pixels/s (depends on scale)
+		this.img = new Image();
+		this.img.src = image;
+		this.lastPositions = [];
 
 		// the following two functions in one function
 		this.attract = function (planet) {
@@ -584,21 +580,68 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 
 		// draw the planet
 		this.draw = function () {
+
+			// draw the tail
+			let alpha = 0.4;
+			let color = utilities.hexToRgb(this.color);
+			let diameter = this.diameter;
+			this.lastPositions.forEach(function (p) {
+				alpha -= 0.01;
+				vars.ctx.fillStyle = "rgba(" + color + "," + alpha + ")";
+				vars.ctx.beginPath();
+				vars.ctx.arc(p.x, p.y, diameter / 2, 0, 2 * Math.PI);
+				vars.ctx.fill();
+			});
+
+			// draw the actual planet
 			vars.ctx.fillStyle = this.color;
-			vars.ctx.beginPath();
-			vars.ctx.arc(this.position.x, this.position.y, this.diameter / scale, 0, 2 * Math.PI);
-			vars.ctx.fill();
-		};
+			if (typeof image === "undefined") {
+				vars.ctx.beginPath();
+				vars.ctx.arc(this.position.x, this.position.y, diameter / 2, 0, 2 * Math.PI);
+				vars.ctx.fill();
+			} else {
+				diameter += 2;
+				vars.ctx.save();
+				vars.ctx.beginPath();
+				vars.ctx.arc(this.position.x, this.position.y, diameter / 2, 0, 2 * Math.PI);
+				vars.ctx.clip();
+				vars.ctx.fill();
+				vars.ctx.drawImage(this.img, this.position.x - diameter / 2, this.position.y - diameter / 2, diameter, diameter);
+				vars.ctx.restore();
+			}
+
+			// hover effect
+			if (utilities.getDistance(vars.mouse, this.position).d <= this.diameter / 2) {
+				vars.ctx.strokeStyle = "white";
+				vars.ctx.lineWidth = 3;
+				vars.ctx.stroke();
+			}
+
+			// draw the text
+			vars.ctx.font = "15px Arial";
+			vars.ctx.textAlign = "center";
+			vars.ctx.fillText(name, this.position.x, this.position.y + this.diameter / 2 + 15);
+			vars.ctx.closePath();
+		}
 	}
 
 	// start function
 	let start = function () {
 
+		vars.canvas.addEventListener('click', function () {
+			planets.forEach(function (p) {
+				if (utilities.getDistance(vars.mouse, p.position).d <= p.diameter) {
+					//console.log(p.name);
+				}
+			});
+		});
+
+		// create the planet
 		let p = utilities.getCenterPoint();
 		//earth(p);
 		//moonArmies(p);
-		//random(p);
-		doubleStarSystem(p);
+		random(p);
+		//doubleStarSystem(p);
 	};
 
 	function earth(p) {
@@ -702,14 +745,20 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 
 		// move all planets
 		planets.forEach(function (p) {
-			p.position.x += p.velocity.x / 60;
-			p.position.y += p.velocity.y / 60;
+
+			// a cool effect
+			if (p.lastPositions.length >= tail) p.lastPositions.pop();
+			p.lastPositions.unshift(Object.assign({}, p.position));
+
+			// change the position
+			p.position.x += p.velocity.x / fps;
+			p.position.y += p.velocity.y / fps;
 		});
 	};
 
 	// render the planets
 	function render() {
-		clearRect();
+		vars.ctx.clearRect(0, 0, vars.width, vars.height);
 		planets.forEach(function (p) {
 			p.draw();
 		});
@@ -718,7 +767,7 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 	return {
 		start: start,
 		update: update,
-		fps: 60
+		fps: fps
 	};
 });
 

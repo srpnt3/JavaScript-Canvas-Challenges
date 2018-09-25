@@ -57,6 +57,17 @@ function setup(callback) {
 		},
 		getSphereDiameter: function (mass, density) { // mass: kg, density: g/cm3
 			return Math.pow((mass / (density * 1000)) / (4 / 3 * Math.PI), 1 / 3) * 2; // in m
+		},
+		rgbToHex: function (rgb) {
+			let x = rgb.toString().split(","),
+				r = Math.round(parseInt(x[0])),
+				g = Math.round(parseInt(x[1])),
+				b = Math.round(parseInt(x[2]));
+			return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+		},
+		hexToRgb: function (hex) {
+			let x = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+			return Math.round(parseInt(x[1], 16)) + "," + Math.round(parseInt(x[2], 16)) + "," + Math.round(parseInt(x[3], 16));
 		}
 	};
 

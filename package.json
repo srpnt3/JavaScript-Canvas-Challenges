@@ -2,7 +2,7 @@
   "name": "challenges",
   "version": "1.0.0",
   "description": "Some cool coding challenges with the JavaScript canvas.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
