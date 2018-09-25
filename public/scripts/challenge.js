@@ -35,6 +35,28 @@ function setup(callback) {
 		},
 		getRandomBoolean: function () {
 			return Math.floor(Math.random() * 2) === 1;
+		},
+		getDistance: function (p1, p2) {
+			let xd = p2.x - p1.x;
+			let yd = p2.y - p1.y;
+			return {
+				x: xd,
+				y: yd,
+				d: Math.sqrt(xd*xd + yd*yd)
+			}
+		},
+		getDirection: function (distance) {
+			return {
+				x: distance.x / distance.d,
+				y: distance.y / distance.d
+			};
+		},
+		round: function (number, decimals) {
+			decimals = Math.pow(10, decimals);
+			return Math.round(number * decimals) / decimals;
+		},
+		getSphereDiameter: function (mass, density) { // mass: kg, density: g/cm3
+			return Math.pow((mass / (density * 1000)) / (4 / 3 * Math.PI), 1 / 3) * 2; // in m
 		}
 	};
 
@@ -54,9 +76,11 @@ function setup(callback) {
 	// start callback
 	vars.canvas.width = vars.width;
 	vars.canvas.height = vars.height;
-	let functions = callback(vars, utilities);
-	functions.start();
-	setInterval(functions.update, 33);
+	let challenge = callback(vars, utilities);
+	let ms = 33;
+	if (typeof challenge.fps !== "undefined") ms = 1000 / challenge.fps;
+	challenge.start();
+	setInterval(challenge.update, ms);
 }
 
 function description() {

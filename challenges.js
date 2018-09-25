@@ -428,5 +428,299 @@ createChallenge("Snake", "A snake eating some pixels.", function (vars, utilitie
 	};
 });
 
+// --------------------------
+// Color Switch
+// --------------------------
+createChallenge("Color Switch", "Don't hit the wrong colors.", function (vars, utilities) {
+
+	function Object(height, render) {
+		this.height = height;
+		this.render = render;
+	}
+
+	let colors = {
+			pink: "#ff0080",
+			purple: "#8c14fc",
+			blue: "#35e2f2",
+			yellow: "#f6df0e"
+		},
+		ball = {
+			color: colors.pink,
+			size: 13,
+			height: vars.height / 4,
+			velocity: 0
+		},
+		objects = [
+			new Object(vars.height / 2, function () {
+				vars.ctx.strokeStyle = colors.blue;
+				vars.ctx.lineWidth = 10;
+				vars.ctx.beginPath();
+				vars.ctx.arc(utilities.getCenterPoint().x, toReal(this.height), 50, 0, 2 * Math.PI);
+				vars.ctx.stroke();
+			}),
+			new Object(vars.height / 4 * 3, function () {
+				vars.ctx.strokeStyle = colors.purple;
+				vars.ctx.lineWidth = 10;
+				vars.ctx.beginPath();
+				vars.ctx.arc(utilities.getCenterPoint().x, toReal(this.height), 50, 0, 2 * Math.PI);
+				vars.ctx.stroke();
+			})
+		],
+		running = false;
+
+	// start function
+	let start = function () {
+
+		// tap
+		document.onkeydown = function (e) {
+			if (e.code === "Space") {
+				ball.velocity = 10;
+				running = true;
+			}
+		};
+		vars.canvas.addEventListener('click', function () {
+			ball.velocity = 10;
+			running = true;
+		}, false);
+	};
+
+	// update function
+	let update = function () {
+
+		// draw
+		render();
+
+		if (running) {
+
+			// change the velocity
+			ball.velocity = Math.round(ball.velocity * 100 - 75) / 100;
+
+			// update the ball position
+			if (ball.height <= 0) {
+				running = false;
+			} else if (ball.height >= vars.height / 5 * 3 && ball.velocity >= 0) {
+				objects.forEach(function (v) {
+					v.height -= ball.velocity;
+				});
+			} else {
+				ball.height += ball.velocity;
+			}
+		}
+	};
+
+	// rener
+	function render() {
+		vars.ctx.clearRect(0, 0, vars.width, vars.height);
+		vars.ctx.fillStyle = ball.color;
+		vars.ctx.beginPath();
+		vars.ctx.arc(utilities.getCenterPoint().x, toReal(ball.height), ball.size, 0, 2 * Math.PI);
+		vars.ctx.fill();
+
+		objects.forEach(function (v, i) {
+			v.render();
+		});
+	}
+
+	function toReal(h) {
+		return vars.height - h;
+	}
+
+	return {
+		start: start,
+		update: update
+	};
+});
+
+// --------------------------
+// Kepplinator
+// --------------------------
+createChallenge("Kepplinator", "Hobbyless planets in their spare time.", function (vars, utilities) {
+
+	// some vars
+	const G = 6.74 * Math.pow(10, -11);
+	const scale = 1000000; // every pixel is 1000 km
+	let speed = 1;
+	let planets = [];
+
+	function clearRect() {
+		let pixels = vars.ctx.getImageData(0, 0, vars.width, vars.height);
+		for (let i = 3; i < pixels.data.length; i += 4) {
+			pixels.data[i] = Math.floor(pixels.data[i] * 0.9);
+		}
+		vars.ctx.putImageData(pixels, 0, 0);
+	}
+
+	// planet constructor
+	function Planet(name, color, mass, density, position, velocity) {
+
+		// some variables
+		this.name = name;
+		this.color = color;
+		this.mass = mass; // kg
+		this.diameter = utilities.getSphereDiameter(mass, density); // m (density: g/cm3)
+		this.position = position; // pixels (depends on scale)
+		this.velocity = velocity; // pixels/s (depends on scale)
+
+		// the following two functions in one function
+		this.attract = function (planet) {
+			let attraction = this.getAttraction(planet);
+			this.applyForce(attraction.force, attraction.direction);
+		};
+
+		// get the force in newtons and the direction accorind to Newton's law of universal gravitation
+		this.getAttraction = function (planet) {
+			let distance = utilities.getDistance(this.position, planet.position);
+			return {
+				force: G * ((this.mass * planet.mass) / Math.pow(distance.d * scale, 2)),
+				direction: utilities.getDirection(distance)
+			}
+		};
+
+		// apply some force so the velocity will change
+		this.applyForce = function (force, direction) {
+			this.velocity.x += force / this.mass * direction.x;
+			this.velocity.y += force / this.mass * direction.y;
+		};
+
+		// draw the planet
+		this.draw = function () {
+			vars.ctx.fillStyle = this.color;
+			vars.ctx.beginPath();
+			vars.ctx.arc(this.position.x, this.position.y, this.diameter / scale, 0, 2 * Math.PI);
+			vars.ctx.fill();
+		};
+	}
+
+	// start function
+	let start = function () {
+
+		let p = utilities.getCenterPoint();
+		//earth(p);
+		//moonArmies(p);
+		//random(p);
+		doubleStarSystem(p);
+	};
+
+	function earth(p) {
+
+		// earth and moon
+		planets.push(new Planet("Earth", "#69D1FF", 5.974 * Math.pow(10, 24), 5.515, {x: p.x, y: p.y}, {x: 0, y: 0}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x + 384.4, y: p.y}, {
+			x: 0,
+			y: 7.8
+		}));
+	}
+
+	function moonArmies(p) {
+
+		// moon army 1
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x + 38.44, y: p.y}, {
+			x: 0,
+			y: -25
+		}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x - 38.44, y: p.y}, {
+			x: 0,
+			y: 25
+		}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y - 38.44}, {
+			x: -25,
+			y: 0
+		}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y + 38.44}, {
+			x: 25,
+			y: 0
+		}));
+
+		// moon army 2
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x + 68.44, y: p.y}, {
+			x: 0,
+			y: 21
+		}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x - 68.44, y: p.y}, {
+			x: 0,
+			y: -15
+		}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y - 68.44}, {
+			x: 8,
+			y: 0
+		}));
+		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y + 68.44}, {
+			x: -25,
+			y: 0
+		}));
+	}
+
+	function random(p) {
+
+		// sun
+		planets.push(new Planet("Sun", "#f7ff59", 9 * Math.pow(10, 25), 1, {x: p.x, y: p.y}, {x: 0, y: 0}));
+
+		// some random planets
+		for (let i = 0; i < utilities.getRandomNumber(5, 13); i++) {
+			planets.push(new Planet(
+				"Planet #" + i,
+				"#cc3333",
+				utilities.getRandomNumber(1, 5) * Math.pow(10, 24),
+				utilities.getRandomNumber(4, 5),
+				{
+					x: utilities.getRandomNumber(100, vars.width - 100),
+					y: utilities.getRandomNumber(100, vars.height - 100)
+				},
+				{
+					x: utilities.getRandomNumber(-50, 50),
+					y: utilities.getRandomNumber(-50, 50)
+				}
+			));
+		}
+	}
+
+	//	double star system
+	function doubleStarSystem(p) {
+
+		planets.push(new Planet("Demian", "#4ab75a", 5.974 * Math.pow(10, 24), 5.515, {x: p.x - 40, y: p.y}, {
+			x: 0,
+			y: 10
+		}));
+		planets.push(new Planet("Beatrice", "#dad84c", 5.974 * Math.pow(10, 24), 5.515, {x: p.x + 40, y: p.y}, {
+			x: 0,
+			y: -10
+		}));
+	}
+
+	// update function
+	let update = function () {
+
+		// render
+		render();
+
+		// attract all planets
+		planets.forEach(function (p1) {
+			planets.forEach(function (p2) {
+				if (p1 !== p2) p1.attract(p2);
+			});
+		});
+
+		// move all planets
+		planets.forEach(function (p) {
+			p.position.x += p.velocity.x / 60;
+			p.position.y += p.velocity.y / 60;
+		});
+	};
+
+	// render the planets
+	function render() {
+		clearRect();
+		planets.forEach(function (p) {
+			p.draw();
+		});
+	}
+
+	return {
+		start: start,
+		update: update,
+		fps: 60
+	};
+});
+
 // export module
 module.exports = challenges;
