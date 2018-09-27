@@ -541,7 +541,9 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 	const scale = 1000000; // every pixel is 1000 km
 	const fps = 60;
 	const tail = 100;
+	let kepler;
 	let planets = [];
+	let sidebarWidth = 400;
 
 	// planet constructor
 	function Planet(name, color, mass, density, position, velocity, image) {
@@ -553,8 +555,10 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 		this.diameter = utilities.getSphereDiameter(mass, density) / scale; // pixels (density: g/cm3)
 		this.position = position; // pixels (depends on scale)
 		this.velocity = velocity; // pixels/s (depends on scale)
-		this.img = new Image();
-		this.img.src = image;
+		if (typeof image !== "undefined") {
+			this.img = new Image();
+			this.img.src = image;
+		}
 		this.lastPositions = [];
 
 		// the following two functions in one function
@@ -563,7 +567,7 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 			this.applyForce(attraction.force, attraction.direction);
 		};
 
-		// get the force in newtons and the direction accorind to Newton's law of universal gravitation
+		// get the force in newtons and the direction accoring to Newton's law of universal gravitation
 		this.getAttraction = function (planet) {
 			let distance = utilities.getDistance(this.position, planet.position);
 			return {
@@ -595,7 +599,7 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 
 			// draw the actual planet
 			vars.ctx.fillStyle = this.color;
-			if (typeof image === "undefined") {
+			if (typeof this.img === "undefined") {
 				vars.ctx.beginPath();
 				vars.ctx.arc(this.position.x, this.position.y, diameter / 2, 0, 2 * Math.PI);
 				vars.ctx.fill();
@@ -611,16 +615,16 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 			}
 
 			// hover effect
-			if (utilities.getDistance(vars.mouse, this.position).d <= this.diameter / 2) {
-				vars.ctx.strokeStyle = "white";
-				vars.ctx.lineWidth = 3;
-				vars.ctx.stroke();
-			}
+			/*		if (utilities.getDistance(vars.mouse, this.position).d <= this.diameter / 2) {
+						vars.ctx.strokeStyle = "white";
+						vars.ctx.lineWidth = 3;
+						vars.ctx.stroke();
+					}*/
 
 			// draw the text
 			vars.ctx.font = "15px Arial";
 			vars.ctx.textAlign = "center";
-			vars.ctx.fillText(name, this.position.x, this.position.y + this.diameter / 2 + 15);
+			vars.ctx.fillText(this.name, this.position.x, this.position.y + this.diameter / 2 + 15);
 			vars.ctx.closePath();
 		}
 	}
@@ -628,113 +632,122 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 	// start function
 	let start = function () {
 
-		vars.canvas.addEventListener('click', function () {
-			planets.forEach(function (p) {
-				if (utilities.getDistance(vars.mouse, p.position).d <= p.diameter) {
-					//console.log(p.name);
-				}
-			});
-		});
+		let head = document.getElementsByTagName("head")[0];
+		// noinspection JSUndefinedPropertyAssignment
+		head.innerHTML += "<style>#sidebar {position: absolute;height: 100%;width: 400px;background-color: rgba(255, 255, 255, 0.1);right: 0;top: 0;z-index: 300;display: flex;flex-direction: column;align-items: stretch;}#sidebar .box {padding: 2em;display: flex;flex-direction: column;justify-content: space-around;align-items: stretch;}#sidebar .box > * {margin-left: 30px;}#sidebar *:not(h2) {margin-bottom: 5px;margin-top: 5px;display: flex;align-items: center;}#sidebar label span {display: inline-block;width: 5em;}#sidebar input {outline: none;border: none;border-bottom: 3px solid #cc3333;background-color: transparent;padding: 5px;color: white;}#sidebar input[type=\"button\"] {border-top: 3px solid transparent;margin: 1em;width: 60%;align-self: center;display: block;}#sidebar input[type=\"button\"]:hover, #sidebar input[type=\"button\"]:active {border-top-color: #cc3333;background-color: #cc3333;cursor: pointer;}</style>";
+		let sidebar = document.createElement("aside");
+		sidebar.id = "sidebar";
+		sidebar.innerHTML = "" +
+			"<form class=\"box\" id=\"create\">\n" +
+			"<h2>Create a planet</h2>\n" +
+			"<label><span>name: </span><input name=\"name\" type=\"text\"> </label>\n" +
+			"<label><span>color: </span><input name=\"color\" type=\"text\"> </label>\n" +
+			"<label><span>mass: </span><input name=\"mass\" type=\"text\"> </label>\n" +
+			"<label><span>density: </span><input name=\"density\" type=\"text\"> </label>\n" +
+			"<label><span>image: </span><input name=\"image\" type=\"text\"> </label>\n" +
+			"<input type=\"button\" value=\"Create\">\n" +
+			"</form>\n" +
+			"<div class=\"box\" id=\"kepler\">\n" +
+			"<h2>Kepler's laws</h2>\n" +
+			"<p>Please create a system with a large planet and a smaller one orbiting it.</p>\n" +
+			"</div>";
+		document.body.appendChild(sidebar);
 
-		// create the planet
+		// the center point
 		let p = utilities.getCenterPoint();
-		//earth(p);
-		//moonArmies(p);
-		random(p);
-		//doubleStarSystem(p);
-	};
-
-	function earth(p) {
+		p.x -= sidebarWidth / 2;
 
 		// earth and moon
-		planets.push(new Planet("Earth", "#69D1FF", 5.974 * Math.pow(10, 24), 5.515, {x: p.x, y: p.y}, {x: 0, y: 0}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x + 384.4, y: p.y}, {
-			x: 0,
-			y: 7.8
-		}));
-	}
-
-	function moonArmies(p) {
-
-		// moon army 1
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x + 38.44, y: p.y}, {
-			x: 0,
-			y: -25
-		}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x - 38.44, y: p.y}, {
-			x: 0,
-			y: 25
-		}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y - 38.44}, {
-			x: -25,
-			y: 0
-		}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y + 38.44}, {
-			x: 25,
-			y: 0
-		}));
-
-		// moon army 2
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x + 68.44, y: p.y}, {
-			x: 0,
-			y: 21
-		}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x - 68.44, y: p.y}, {
-			x: 0,
-			y: -15
-		}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y - 68.44}, {
-			x: 8,
-			y: 0
-		}));
-		planets.push(new Planet("Moon", "#5c5c5c", 7.349 * Math.pow(10, 22), 3.341, {x: p.x, y: p.y + 68.44}, {
-			x: -25,
-			y: 0
-		}));
-	}
-
-	function random(p) {
-
-		// sun
-		planets.push(new Planet("Sun", "#f7ff59", 9 * Math.pow(10, 25), 1, {x: p.x, y: p.y}, {x: 0, y: 0}));
-
-		// some random planets
-		for (let i = 0; i < utilities.getRandomNumber(5, 13); i++) {
-			planets.push(new Planet(
-				"Planet #" + i,
-				"#cc3333",
-				utilities.getRandomNumber(1, 5) * Math.pow(10, 24),
-				utilities.getRandomNumber(4, 5),
-				{
-					x: utilities.getRandomNumber(100, vars.width - 100),
-					y: utilities.getRandomNumber(100, vars.height - 100)
-				},
-				{
-					x: utilities.getRandomNumber(-50, 50),
-					y: utilities.getRandomNumber(-50, 50)
-				}
-			));
-		}
-	}
-
-	//	double star system
-	function doubleStarSystem(p) {
-
-		planets.push(new Planet("Demian", "#4ab75a", 5.974 * Math.pow(10, 24), 5.515, {x: p.x - 40, y: p.y}, {
-			x: 0,
-			y: 10
-		}));
-		planets.push(new Planet("Beatrice", "#dad84c", 5.974 * Math.pow(10, 24), 5.515, {x: p.x + 40, y: p.y}, {
-			x: 0,
-			y: -10
-		}));
-	}
+		planets.push(new Planet(
+			"EArth ($120)",
+			"#69D1FF",
+			5.974 * Math.pow(10, 24),
+			5.515,
+			{x: p.x, y: p.y},
+			{x: 0, y: 0}
+		));
+		planets.push(new Planet(
+			"Moon basic edition ($60)",
+			"#5c5c5c",
+			7.349 * Math.pow(10, 22),
+			3.341,
+			{x: p.x + 100, y: p.y},
+			{x: 0, y: 10}
+		));
+		planets.push(new Planet(
+			"Moon DLC ($100)",
+			"#5c5c5c",
+			7.349 * Math.pow(10, 22),
+			3.341,
+			{x: p.x + 384.4, y: p.y},
+			{x: 0, y: 7.8}
+		));
+	};
 
 	// update function
 	let update = function () {
 
 		// render
 		render();
+
+		// kepler's laws
+		let element = document.getElementById("kepler");
+		if (typeof kepler === "undefined") {
+			if (planets.length === 2 && planets[0].mass !== planets[1].mass) {
+
+				// get the two planets
+				let satelite, primary;
+				if (planets[0].mass < planets[1].mass) {
+					satelite = planets[0];
+					primary = planets[1];
+				}
+				else {
+					satelite = planets[1];
+					primary = planets[0];
+				}
+				let d = utilities.getDistance(satelite.position, primary.position).d * scale;
+
+				// create the kepler object
+				kepler = {
+					satelite: satelite,
+					primary: primary,
+					apoapsis: d,
+					periapsis: d,
+					semiMajorAxis: 0,
+					orbitalPeriod: 0,
+					keplerConstant: 0,
+					positions: [Object.assign({}, satelite.position)]
+				}
+
+			} else {
+				element.innerHTML = "<h2>Kepler's laws</h2>\n<p>Please create a system with a large planet and a smaller one orbiting it.</p>\n";
+			}
+		} else {
+			if (planets.length === 2 && planets[0].mass !== planets[1].mass) {
+
+				// update the calculations
+				let d = utilities.getDistance(kepler.satelite.position, kepler.primary.position).d * scale;
+				if (d < kepler.periapsis) kepler.periapsis = d;
+				if (d > kepler.apoapsis) kepler.apoapsis = d;
+				kepler.semiMajorAxis = (kepler.apoapsis + kepler.periapsis) / 2;
+				kepler.orbitalPeriod = Math.sqrt((4 * Math.pow(Math.PI, 2) * Math.pow(kepler.semiMajorAxis, 3)) / (G * (kepler.satelite.mass + kepler.primary.mass)));
+				kepler.keplerConstant = Math.pow(kepler.orbitalPeriod, 2) / Math.pow(kepler.semiMajorAxis, 3);
+				if (utilities.getDistance(kepler.positions[0], kepler.satelite.position).d >= 5) kepler.positions.unshift(Object.assign({}, kepler.satelite.position));
+				if (kepler.positions.length > 20 && utilities.getDistance(kepler.positions[kepler.positions.length - 1], kepler.satelite.position).d <= 33) kepler.positions.pop();
+
+				// display the calculations
+				element.innerHTML = "" +
+					"<h2>Kepler's laws</h2>\n" +
+					"<p>apoapsis: " + kepler.apoapsis.toExponential(2) + " m<\p>\n" +
+					"<p>periapsis: " + kepler.periapsis.toExponential(2) + " m<\p>\n" +
+					"<p>semi-major axis: " + kepler.semiMajorAxis.toExponential(2) + " m<\p>\n" +
+					"<p>orbital period: " + kepler.orbitalPeriod.toExponential(2) + " s<\p>\n" +
+					"<p>kepler constant: " + kepler.keplerConstant.toExponential(2) + " s^2/m^3<\p>";
+
+			} else {
+				kepler = undefined;
+			}
+		}
 
 		// attract all planets
 		planets.forEach(function (p1) {
@@ -759,6 +772,14 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 	// render the planets
 	function render() {
 		vars.ctx.clearRect(0, 0, vars.width, vars.height);
+		if (typeof kepler !== "undefined") {
+			kepler.positions.forEach(function (p) {
+				vars.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+				vars.ctx.beginPath();
+				vars.ctx.arc(p.x, p.y, 1, 0, 2 * Math.PI);
+				vars.ctx.fill();
+			});
+		}
 		planets.forEach(function (p) {
 			p.draw();
 		});
