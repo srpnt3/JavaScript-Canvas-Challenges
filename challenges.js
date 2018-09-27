@@ -581,6 +581,10 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 			this.velocity.x += force / this.mass * direction.x;
 			this.velocity.y += force / this.mass * direction.y;
 		};
+		
+		this.getSpeed = function () {
+			return Math.sqrt(velocity.x*velocity.x + velocity.y*velocity.y) * scale;
+		};
 
 		// draw the planet
 		this.draw = function () {
@@ -680,7 +684,7 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 			7.349 * Math.pow(10, 22),
 			3.341,
 			{x: p.x + 384.4, y: p.y},
-			{x: 0, y: 7.8}
+			{x: 0, y: 5}
 		));
 	};
 
@@ -713,6 +717,8 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 					primary: primary,
 					apoapsis: d,
 					periapsis: d,
+					maxSpeed: satelite.getSpeed(),
+					minSpeed: satelite.getSpeed(),
 					semiMajorAxis: 0,
 					orbitalPeriod: 0,
 					keplerConstant: 0,
@@ -727,8 +733,11 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 
 				// update the calculations
 				let d = utilities.getDistance(kepler.satelite.position, kepler.primary.position).d * scale;
+				let s = kepler.satelite.getSpeed();
 				if (d < kepler.periapsis) kepler.periapsis = d;
 				if (d > kepler.apoapsis) kepler.apoapsis = d;
+				if (s > kepler.maxSpeed) kepler.maxSpeed = s;
+				if (s < kepler.minSpeed) kepler.minSpeed = s;
 				kepler.semiMajorAxis = (kepler.apoapsis + kepler.periapsis) / 2;
 				kepler.orbitalPeriod = Math.sqrt((4 * Math.pow(Math.PI, 2) * Math.pow(kepler.semiMajorAxis, 3)) / (G * (kepler.satelite.mass + kepler.primary.mass)));
 				kepler.keplerConstant = Math.pow(kepler.orbitalPeriod, 2) / Math.pow(kepler.semiMajorAxis, 3);
@@ -740,6 +749,8 @@ createChallenge("Kepplinator", "Hobbyless planets in their spare time.", functio
 					"<h2>Kepler's laws</h2>\n" +
 					"<p>apoapsis: " + kepler.apoapsis.toExponential(2) + " m<\p>\n" +
 					"<p>periapsis: " + kepler.periapsis.toExponential(2) + " m<\p>\n" +
+					"<p>max speed: " + kepler.maxSpeed.toExponential(2) + " m/s<\p>\n" +
+					"<p>min speed: " + kepler.minSpeed.toExponential(2) + " m/s<\p>\n" +
 					"<p>semi-major axis: " + kepler.semiMajorAxis.toExponential(2) + " m<\p>\n" +
 					"<p>orbital period: " + kepler.orbitalPeriod.toExponential(2) + " s<\p>\n" +
 					"<p>kepler constant: " + kepler.keplerConstant.toExponential(2) + " s^2/m^3<\p>";
