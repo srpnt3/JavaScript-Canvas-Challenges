@@ -68,6 +68,39 @@ function setup(callback) {
 		hexToRgb: function (hex) {
 			let x = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 			return Math.round(parseInt(x[1], 16)) + "," + Math.round(parseInt(x[2], 16)) + "," + Math.round(parseInt(x[3], 16));
+		},
+		complexFunctions: {
+			add: function (a, b) {
+				return {
+					re: a.re + b.re,
+					im: a.im + b.im
+				}
+			},
+			subtract: function (a, b) {
+				return {
+					re: a.re - b.re,
+					im: a.im - b.im
+				}
+			},
+			multiply: function (a, b) {
+				return {
+					re: (a.re * b.re) - (a.im * b.im),
+					im: (a.re * b.im) + (a.im * b.re)
+				}
+			},
+			divide: function (a, b) {
+				let co = (1/(Math.pow(b.re, 2) + Math.pow(b.im, 2)));
+				return {
+					re: co * ((a.re * b.re) + (a.im * b.im)),
+					im: co * ((a.im * b.re) - (a.re * b.im))
+				}
+			}/*,
+			pow: function (a, x) {
+
+			},
+			root: function (a, x) {
+				
+			}*/
 		}
 	};
 
@@ -82,6 +115,7 @@ function setup(callback) {
 		vars.height = window.innerHeight;
 		vars.canvas.width = vars.width;
 		vars.canvas.height = vars.height;
+		challenge.resize();
 	}, false);
 
 	// start callback

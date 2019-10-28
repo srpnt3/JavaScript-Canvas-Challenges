@@ -1,5 +1,6 @@
 const express = require("express");
-const challenges = require("./challenges");
+const challengeRegisterer = require("./ChallengeRegisterer");
+const challenges = challengeRegisterer.challenges;
 const app = express();
 const port = 82;
 
