@@ -130,14 +130,33 @@ challengeRegisterer.create("Kepplinator", "Hobbyless planets in their spare time
 		let p = utilities.getCenterPoint();
 		p.x -= sidebarWidth / 2;
 
+		for (let i = 0; i < 16; i++) {
+			planets.push(new Planet(
+				"Planet #" + i,
+				utilities.rgbToHex(utilities.getRandomNumber(0, 255) + "," + utilities.getRandomNumber(0, 255) + "," + utilities.getRandomNumber(0, 255)),
+				utilities.getRandomNumber(4, 6) * Math.pow(10, 25),
+				5,
+				{x: utilities.getRandomNumber(100, vars.width-100), y: utilities.getRandomNumber(100, vars.height-100)},
+				{x: utilities.getRandomNumber(-10, 10), y: utilities.getRandomNumber(-10, 10)},
+			));
+		}
+
 		// earth and moon
-		planets.push(new Planet(
-			"EArth ($120)",
+		/*planets.push(new Planet(
+			"EArth",
 			"#69D1FF",
 			5.974 * Math.pow(10, 24),
 			5.515,
-			{x: p.x, y: p.y},
-			{x: 0, y: 0}
+			{x: p.x + 20, y: p.y},
+			{x: 0, y: -20}
+		));
+		planets.push(new Planet(
+			"Sputnik 1",
+			"#cc3333",
+			83.6,
+			2.7,
+			{x: p.x + 1.2, y: p.y},
+			{x: 0, y: 8}
 		));
 		planets.push(new Planet(
 			"Moon basic edition ($60)",
@@ -154,7 +173,7 @@ challengeRegisterer.create("Kepplinator", "Hobbyless planets in their spare time
 			3.341,
 			{x: p.x + 384.4, y: p.y},
 			{x: 0, y: 5}
-		));
+		));*/
 	};
 
 	// update function

@@ -43,11 +43,19 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 	function draw() {
 		calculateArea();
 
-		vars.ctx.fillStyle = "#ffffff";
+		let iterations = 10000;
 
 		for (let x = 0; x < vars.width; x++) {
 			for (let y = 0; y < vars.height; y++) {
-				if (itarate(findCorrespondingCoordinates(x, y), 100)) vars.ctx.fillRect(x, y, 1, 1 );
+				let it = itarate(findCorrespondingCoordinates(x, y), iterations);
+				if (it === -1) {
+					vars.ctx.fillStyle = "#ffffff";
+					vars.ctx.fillRect(x, y, 1, 1);
+				} else {
+					let i = (it / iterations) * 255;
+					vars.ctx.fillStyle = utilities.rgbToHex(i + "," + i + "," + i);
+					vars.ctx.fillRect(x, y, 1, 1);
+				}
 			}
 		}
 	}
@@ -97,9 +105,12 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 	function itarate(c, n) {
 		let z = {re: 0, im:0};
 		for (let i = 0; i < n; i++) {
-			z = m.add(m.multiply(z, z), c)
+			z = m.add(m.multiply(z, z), c);
+			if (m.getAbsoluteValue(z) > 2) {
+				return i;
+			}
 		}
-		return !(Number.isNaN(z.re) && Number.isNaN(z.im))
+		return -1;
 	}
 	
 	return {

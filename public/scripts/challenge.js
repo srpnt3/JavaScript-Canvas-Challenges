@@ -94,6 +94,9 @@ function setup(callback) {
 					re: co * ((a.re * b.re) + (a.im * b.im)),
 					im: co * ((a.im * b.re) - (a.re * b.im))
 				}
+			},
+			getAbsoluteValue(a) {
+				return Math.sqrt((Math.pow(a.re, 2) + Math.pow(a.im, 2)));
 			}/*,
 			pow: function (a, x) {
 
