@@ -12,6 +12,10 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 		x2: 1,
 		y2: -1
 	};
+	let gradient = {
+		min: {r: 36, g: 30, b: 64},
+		max: {r: 63, g: 143, b: 80},
+	};
 	let downCoords = {};
 	let Screen = {};
 
@@ -43,17 +47,20 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 	function draw() {
 		calculateArea();
 
-		let iterations = 10000;
+		let iterations = 1000;
 
 		for (let x = 0; x < vars.width; x++) {
 			for (let y = 0; y < vars.height; y++) {
 				let it = itarate(findCorrespondingCoordinates(x, y), iterations);
 				if (it === -1) {
-					vars.ctx.fillStyle = "#ffffff";
+					vars.ctx.fillStyle = "#131313";
 					vars.ctx.fillRect(x, y, 1, 1);
 				} else {
-					let i = (it / iterations) * 255;
-					vars.ctx.fillStyle = utilities.rgbToHex(i + "," + i + "," + i);
+					let i = (Math.cos((it/10-1) * Math.PI) + 1) / 2;
+					let r = gradient.min.r + (gradient.max.r - gradient.min.r) * i;
+					let g = gradient.min.g + (gradient.max.g - gradient.min.g) * i;
+					let b = gradient.min.b + (gradient.max.b - gradient.min.b) * i;
+					vars.ctx.fillStyle = utilities.rgbToHex(r + "," + g + "," + b);
 					vars.ctx.fillRect(x, y, 1, 1);
 				}
 			}
@@ -89,7 +96,7 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 		} else { // exactly the same
 			Screen.width = Area.width;
 			Screen.height = Area.height;
-			Screen.startPoint = { x: Area.x1, y: Area.y1 }
+			Screen.startPoint = {x: Area.x1, y: Area.y1}
 		}
 	}
 
@@ -103,7 +110,7 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 
 	// the math
 	function itarate(c, n) {
-		let z = {re: 0, im:0};
+		let z = {re: 0, im: 0};
 		for (let i = 0; i < n; i++) {
 			z = m.add(m.multiply(z, z), c);
 			if (m.getAbsoluteValue(z) > 2) {
@@ -112,7 +119,7 @@ challengeRegisterer.create("Mandelbrot", "Nice bread you've got there. Now go to
 		}
 		return -1;
 	}
-	
+
 	return {
 		start: start,
 		resize: resize
