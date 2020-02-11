@@ -61,7 +61,7 @@
 	}
 
 	header {
-		margin: 20vh 0;
+		margin: 20vh auto;
 		max-width: 95vw;
 		flex-direction: column;
 		align-items: center
