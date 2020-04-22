@@ -9,10 +9,10 @@
   "author": "VirusHD",
   "license": "ISC",
   "dependencies": {
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
-    "mathjs": "^6.2.3",
-    "nodemon": "^1.17.5",
-    "npm": "^6.13.7"
+    "ejs": "^2.7.4",
+    "express": "^4.17.1",
+    "mathjs": "^6.6.4",
+    "nodemon": "^1.19.4",
+    "npm": "^6.14.4"
   }
 }
