@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "ejs": "^2.7.4",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "mathjs": "^6.6.4",
     "nodemon": "^1.19.4",
     "npm": "^6.14.6"
